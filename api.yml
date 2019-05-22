@@ -1,0 +1,155 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Microservice for Follows
+  description: Java + PostgreSQL
+  license:
+    name: Software Architecture, 2019-I
+host: 192.168.99.101:4000 #change
+basePath: /ana/
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+
+  /users/{userId}/following:
+    post:
+      summary: Creates a new follow relationship
+      operationId: createFollow
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          type: string
+          description: The id of the user that is following the other
+        - name: following
+          in: body
+          required: true
+          description: User being followed
+          schema:
+            $ref: '#/definitions/Following'
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    get:
+      summary: Returns the IDs of the users the given user is following
+      operationId: getFollowing
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          type: string
+          description: The id of the given user
+      responses:
+        '200':
+          description: Ok
+          schema:
+            $ref: '#/definitions/UserIdList'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+          
+  /users/{userId}/followers:
+    get:
+      summary: Returns the IDs of the followers of the given user
+      operationId: getFollowers
+      parameters:
+        - name: userId
+          in: path
+          description: The id of the given user
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Ok
+          schema:
+            $ref: '#/definitions/UserIdList'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+
+
+  /users/{userId}/following/{otherUserId}:
+    delete:
+      summary: Deletes a follow relationshiop
+      operationId: deleteFollow
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          type: string
+          description: The id of the user that is following the other user
+        - name: otherUserId
+          in: path
+          required: true
+          type: string
+          description: The id of the user that is being followed
+      responses:
+        '200':
+          description: Ok
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+
+
+definitions:
+
+  Following:
+    type: object
+    required:
+      - followingId
+    properties:
+      followingId:
+        type: string
+
+  UserIdList:
+    type: object
+    required:
+      - total
+      - list
+    properties:
+      total:
+        type: number
+      list:
+        type: array
+        items:
+          type: string
+
+  ErrorModel:
+    type: object
+    required:
+      - message
+      - code
+    properties:
+      message:
+        type: string
+      code:
+        type: number
+      description:
+        type: object
