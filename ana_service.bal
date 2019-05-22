@@ -1,9 +1,10 @@
 import ballerina/http;
 import ballerina/io;
 import ballerinax/docker;
-import ballerina/grpc;
+import controller;
 
 const string ERROR_NO_FOLLOWING_ID_IN_JSON = "Payload should contain a JSON with a string followingId";
+const string ERROR_FAILED_TO_INSERT_RECORD = "Failed to insert the follow in the database";
 
 #API names for url parameters
 const string USER_ID = "userId";
@@ -54,10 +55,15 @@ service ana on cmdListener {
             json followingId = payload[FOLLOWING_ID];
             if ( followingId is string )
             {
-                //TODO: insert it to database and check if it's ok
-                res = { };
-                res[FOLLOWER_ID] = userId;
-                res[FOLLOWING_ID] = followingId;
+                controller:ApiFollow|error r = controller:insertFollow(userId, followingId);
+                
+                if (r is controller:ApiFollow) {
+                    res = { };
+                    res[FOLLOWER_ID] = r.followerId;
+                    res[FOLLOWING_ID] = r.followingId;
+                } else {
+                    res = buildErrorJson(400, ERROR_FAILED_TO_INSERT_RECORD);
+                }
             }
             else
             {
@@ -75,6 +81,21 @@ service ana on cmdListener {
     resource function getFollowers(http:Caller caller, http:Request request, string userId) {
         json res = {};
         res["calledMethod"] = "getFollowers(" + userId + ")";
+
+
+        controller:ApiUserIdList|error r = controller:getFollowers(userId);
+        if ( r is error )
+        {
+            res = buildErrorJson(400, ERROR_NO_FOLLOWING_ID_IN_JSON);
+        }
+        else
+        {
+            res = {
+                "count": r.count,
+                "userIds": r.userIds
+            };
+        }
+        
         //TODO
         sendResponse(caller, res);
     }
