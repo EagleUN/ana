@@ -32,3 +32,26 @@ public function getFollowers(string userId) returns ApiUserIdList|error
         return new ApiUserIdList(r);
     }
 }
+
+public function getFollowing(string userId) returns ApiUserIdList|error
+{
+    string[]|error r = model:getFollowing(userId);
+    if ( r is error )
+    {
+        return r;
+    }
+    else
+    {
+        return new ApiUserIdList(r);
+    }
+}
+
+public function follows(string followerId, string followingId) returns boolean|error
+{
+    return model:follows(followerId, followingId);
+}
+
+public function deleteFollow(string followerId, string followingId) returns boolean|error
+{
+    return model:deleteFollow(followerId, followingId);
+}
