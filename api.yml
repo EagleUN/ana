@@ -117,6 +117,30 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
 
+    get:
+      summary: Checks if a user follows another user
+      operationId: follows
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          type: string
+          description: The id of the user that is following the other user
+        - name: otherUserId
+          in: path
+          required: true
+          type: string
+          description: The id of the user that is being followed
+      responses:
+        '200':
+          description: Ok, the user follows the other user
+        '204':
+          description: No content, the user does not follow the other user
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+
 
 definitions:
 
@@ -149,7 +173,5 @@ definitions:
     properties:
       message:
         type: string
-      code:
-        type: number
       description:
         type: object
