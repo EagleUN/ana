@@ -47,8 +47,15 @@ function sendOKResponse(http:Caller caller, json res) {
 }
 @docker:Expose { }
 @docker:CopyFiles{
-    files: [{ source: "postgresql-42.2.5.jar",
-            target: "/ballerina/runtime/bre/lib" }]
+    files: [{
+            source: "postgresql-42.2.5.jar",
+            target: "/ballerina/runtime/bre/lib"
+        },
+        {
+            source: "ballerina.conf",
+            target: "/home/ballerina"
+        }
+    ]
 }
 listener http:Listener cmdListener = new(9090);
 
