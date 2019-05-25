@@ -5,5 +5,5 @@ sudo cp docker-compose.yml target
 sudo cp postgresql-42.2.5.jar target
 
 cd target
-docker-compose build
-docker-compose up
+sudo docker-compose build
+sudo docker-compose up

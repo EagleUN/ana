@@ -1,11 +1,23 @@
 import ballerina/io;
 import ballerinax/jdbc;
 import ballerina/sql;
+import ballerina/config;
+
+function get(string config) returns string {
+    return config:getAsString(config);
+}
+
+string DB_IP       = get("DB_IP");
+string DB_PORT     = get("DB_PORT"); 
+string DB_NAME     = get("DB_NAME"); 
+string DB_USERNAME = get("DB_USERNAME"); 
+string DB_PASSWORD = get("DB_PASSOWRD"); 
+string DB_URL = "jdbc:postgresql://" + DB_IP + ":" + DB_PORT + "/" + DB_NAME;
 
 jdbc:Client followsDB = new({
-    url: "jdbc:postgresql://192.168.99.107:25432/feedms",
-    username: "feedms",
-    password: "yiuPh9eipiu2la9ie8gaifee"
+    url: DB_URL,
+    username: DB_USERNAME,
+    password: DB_PASSWORD
 });
 
 type ModelError error<string, map<anydata|error>>;
