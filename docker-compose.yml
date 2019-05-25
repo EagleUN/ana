@@ -1,0 +1,9 @@
+version: '2'
+
+services:
+  ana_service:
+    build:
+      context: .
+      dockerfile: './ana_service/Dockerfile'
+    ports:
+      - '9090:9090'

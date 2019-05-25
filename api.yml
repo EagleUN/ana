@@ -134,8 +134,8 @@ paths:
       responses:
         '200':
           description: Ok, the user follows the other user
-        '204':
-          description: No content, the user does not follow the other user
+          schema:
+            $ref: '#/definitions/FollowsBoolean'
         '500':
           description: unexpected error
           schema:
@@ -143,6 +143,14 @@ paths:
 
 
 definitions:
+
+  FollowsBoolean:
+    type: object
+    required:
+      - follows
+    properties:
+      follows:
+        type: boolean
 
   Following:
     type: object

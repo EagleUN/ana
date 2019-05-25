@@ -1,11 +1,12 @@
 import ballerina/http;
 import ballerina/io;
-import ballerinax/docker;
 import controller;
+import ballerinax/docker;
 
 const string ERROR_NO_FOLLOWING_ID_IN_JSON = "Payload should contain a JSON with a string followingId";
 const string ERROR_FAILED_TO_INSERT_RECORD = "Failed to insert the follow in the database";
 const string INTERNAL_DATABASE_ERROR = "Internal error related to DB";
+const string NO_JSON_PAYLOAD = "There should be a json payload with the request";
 
 #API names for url parameters
 const string USER_ID = "userId";
@@ -41,8 +42,14 @@ function sendOKResponse(http:Caller caller, json res) {
     sendResponse(caller, response);
 }
 
-@docker:Config {}
-@docker:Expose {}
+@docker:Config {
+    name: "ana_service"
+}
+@docker:Expose { }
+@docker:CopyFiles{
+    files: [{ source: "postgresql-42.2.5.jar",
+            target: "/ballerina/runtime/bre/lib" }]
+}
 listener http:Listener cmdListener = new(9090);
 
 @http:ServiceConfig {
@@ -56,10 +63,11 @@ service ana on cmdListener {
     }
     resource function postFollow(http:Caller caller, http:Request request, string userId)
     {
+        io:println("postFollow(" + userId + ")");
         json|error payload = request.getJsonPayload();
 
         if ( payload is error ) {
-            sendErrorResponse(caller, 400, buildErrorJson(ERROR_NO_FOLLOWING_ID_IN_JSON));
+            sendErrorResponse(caller, 400, buildErrorJson(NO_JSON_PAYLOAD));
         }
         else
         {
@@ -87,11 +95,12 @@ service ana on cmdListener {
         path: "users/{" + USER_ID + "}/followers"
     }
     resource function getFollowers(http:Caller caller, http:Request request, string userId)
-{
+    {
+        io:println("getFollower(" + userId + ")");
         controller:ApiUserIdList|error r = controller:getFollowers(userId);
         if ( r is error )
         {
-            sendErrorResponse(caller, 400, buildErrorJson(ERROR_NO_FOLLOWING_ID_IN_JSON) );
+            sendErrorResponse(caller, 500, INTERNAL_DATABASE_ERROR);
         }
         else {    
             json res = {
@@ -108,10 +117,11 @@ service ana on cmdListener {
     }
     resource function getFollowing(http:Caller caller, http:Request request, string userId)
     {
+        io:println("getFollowing(" + userId + ")");
         controller:ApiUserIdList|error r = controller:getFollowing(userId);
         if ( r is error )
         {
-            sendErrorResponse(caller, 400, buildErrorJson(ERROR_NO_FOLLOWING_ID_IN_JSON) );
+            sendErrorResponse(caller, 500, INTERNAL_DATABASE_ERROR);
         }
         else
         {
@@ -128,7 +138,8 @@ service ana on cmdListener {
         path: "users/{" + USER_ID + "}/following/{" + OTHER_USER_ID + "}"
     }
     resource function deleteFollow(http:Caller caller, http:Request request, string userId, string otherUserId )
-    {        
+    {
+        io:println("deleteFollow(" + userId + "," + otherUserId + ")");
         boolean|error r = controller:deleteFollow(userId, otherUserId);
         if ( r is error )
         {
@@ -154,6 +165,7 @@ service ana on cmdListener {
     }
     resource function getFollow(http:Caller caller, http:Request request, string userId, string otherUserId )
     {
+        io:println("getFollow(" + userId + "," + otherUserId + ")");
         boolean|error r = controller:follows(userId, otherUserId);
         if ( r is error )
         {
@@ -161,17 +173,7 @@ service ana on cmdListener {
         }
         else
         {
-            if ( r )
-            {
-                sendOKResponse(caller, {});
-            }
-            else
-            {
-                http:Response response = new;
-                response.statusCode = 204;
-                sendResponse(caller, response);
-            }
-            
+            sendOKResponse(caller, {"follows": r} );   
         }
     }
 

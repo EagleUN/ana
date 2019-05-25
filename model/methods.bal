@@ -3,7 +3,7 @@ import ballerinax/jdbc;
 import ballerina/sql;
 
 jdbc:Client followsDB = new({
-    url: "jdbc:postgresql://localhost:25432/feedms",
+    url: "jdbc:postgresql://192.168.99.107:25432/feedms",
     username: "feedms",
     password: "yiuPh9eipiu2la9ie8gaifee"
 });
@@ -30,16 +30,28 @@ public function follows(string followerId, string followingId) returns boolean|e
     if ( selectRet is table<Follow> ) {
         return selectRet.hasNext();
     }
+    else {
+        io:println("ERROR: " + <string>selectRet.detail().message);
+    }
     return buildError("Error getting followers from DB");
 }
 
 public function insertFollow(string followerId, string followingId) returns boolean
 {
+    io:println("On insertFollow(" + followerId + "," + followingId + ")");
     var retWithKey = followsDB->update(
             "INSERT INTO follows (follower_id, following_id) values (?, ?)",
             followerId, followingId);
 
-    return (retWithKey is sql:UpdateResult);
+    if (retWithKey is sql:UpdateResult) {
+        io:println ("Insertion successful!!!");
+        return true;
+    }
+    else {
+        io:println("ERROR: " + <string>retWithKey.detail().message);
+        //TODO Return error
+    }
+    return false;
 }
 
 
@@ -57,6 +69,7 @@ public function getFollowers(string userId) returns string[]|error
         return userIdList;
     }
     else {
+        io:println("ERROR: " + <string>selectRet.detail().message);
         return buildError("Error getting followers from DB");
     }
 }
@@ -72,6 +85,7 @@ public function getFollowing(string userId) returns string[]|error
         return userIdList;
     }
     else {
+        io:println("ERROR: " + <string>selectRet.detail().message);
         return buildError("Error getting followers from DB");
     }
 }
@@ -89,6 +103,9 @@ public function deleteFollow(string followerId, string followingId) returns bool
             followerId, followingId );
     if (ret is sql:UpdateResult) {
         return ( ret.updatedRowCount > 0 );
+    }
+    else  {
+        io:println("ERROR: " + <string>ret.detail().message);
     }
     return buildError("Error deleting follower from DB");
 
