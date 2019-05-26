@@ -1,7 +1,9 @@
 import ballerina/http;
 import ballerina/io;
-import controller;
 import ballerinax/docker;
+
+import controller;
+import notifications;
 
 const string ERROR_NO_FOLLOWING_ID_IN_JSON = "Payload should contain a JSON with a string followingId";
 const string ERROR_FAILED_TO_INSERT_RECORD = "Failed to insert the follow in the database";
@@ -79,19 +81,26 @@ service ana on cmdListener {
         else
         {
             json followingId = payload[FOLLOWING_ID];
-            if ( followingId is string ) {
+            if ( followingId is string )
+            {
                 controller:ApiFollow|error r = controller:insertFollow(userId, followingId);
-                if (r is error) {
+                if (r is error)
+                {
                     sendErrorResponse(caller, 400, buildErrorJson(ERROR_FAILED_TO_INSERT_RECORD));
                 }
-                else {
+                else
+                {
+                    // TODO make sure both IDs are UUIDs
+                    notifications:notifyFollow(untaint r.followerId,untaint  r.followingId);
+
                     json res = { };
                     res[FOLLOWER_ID] = r.followerId;
                     res[FOLLOWING_ID] = r.followingId;
                     sendOKResponse(caller, res);
                 }
             }
-            else {
+            else
+            {
                 sendErrorResponse(caller, 400, buildErrorJson(ERROR_NO_FOLLOWING_ID_IN_JSON));
             }
         }
