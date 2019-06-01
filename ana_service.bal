@@ -76,16 +76,19 @@ service ana on cmdListener {
         json|error payload = request.getJsonPayload();
 
         if ( payload is error ) {
+            io:println("payload is error");
             sendErrorResponse(caller, 400, buildErrorJson(NO_JSON_PAYLOAD));
         }
         else
         {
+            io:println("payload: " + payload.toString());
             json followingId = payload[FOLLOWING_ID];
             if ( followingId is string )
             {
                 controller:ApiFollow|error r = controller:insertFollow(userId, followingId);
                 if (r is error)
                 {
+                    io:println("insert follow returned error");
                     sendErrorResponse(caller, 400, buildErrorJson(ERROR_FAILED_TO_INSERT_RECORD));
                 }
                 else
@@ -101,6 +104,7 @@ service ana on cmdListener {
             }
             else
             {
+                io:println("followingId is not a string");
                 sendErrorResponse(caller, 400, buildErrorJson(ERROR_NO_FOLLOWING_ID_IN_JSON));
             }
         }
@@ -163,7 +167,10 @@ service ana on cmdListener {
         }
         else
         {
-            sendOKResponse(caller, {});
+            json res = { };
+            res[FOLLOWER_ID] = userId;
+            res[FOLLOWING_ID] = otherUserId;
+            sendOKResponse(caller, res);
         }
     }
 
