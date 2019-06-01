@@ -10,7 +10,7 @@ function buildError(string message) returns ControllerError {
 
 public function insertFollow(string followerId, string followingId) returns ApiFollow|error {
     
-    if ( model:insertFollow(followerId, followingId) )
+    if ( model:insertFollow(followerId, followingId) == true)
     {
         return new ApiFollow(followerId, followingId);
     }

@@ -2,6 +2,9 @@ import ballerina/io;
 import ballerinax/jdbc;
 import ballerina/sql;
 import ballerina/config;
+import ballerina/utils;
+import ballerina/system;
+
 
 function get(string config) returns string {
     return config:getAsString(config);
@@ -36,7 +39,7 @@ function buildError(string message) returns ModelError
 public function follows(string followerId, string followingId) returns boolean|error
 {
     var selectRet = followsDB->select(
-            "SELECT follower_id, following_id FROM follows WHERE follower_id = ? AND following_id = ?",
+            "SELECT follower_id, following_id FROM follows WHERE follower_id = CAST(? AS uuid) AND following_id = CAST(? AS uuid)",
             Follow, followerId, followingId);
 
     if ( selectRet is table<Follow> ) {
@@ -48,11 +51,14 @@ public function follows(string followerId, string followingId) returns boolean|e
     return buildError("Error getting followers from DB");
 }
 
-public function insertFollow(string followerId, string followingId) returns boolean
+public function insertFollow(string followerId, string followingId) returns boolean|error
 {
+
+    var x = system:uuid();
+    var y = system:uuid();
     io:println("On insertFollow(" + followerId + "," + followingId + ")");
     var retWithKey = followsDB->update(
-            "INSERT INTO follows (follower_id, following_id) values (?, ?)",
+            "INSERT INTO follows (follower_id, following_id) values (CAST(? AS uuid), CAST(? AS uuid))",
             followerId, followingId);
 
     if (retWithKey is sql:UpdateResult) {
@@ -61,16 +67,15 @@ public function insertFollow(string followerId, string followingId) returns bool
     }
     else {
         io:println("ERROR: " + <string>retWithKey.detail().message);
-        //TODO Return error
+        return buildError("Error inserting follow to DB");
     }
-    return false;
 }
 
 
 public function getFollowers(string userId) returns string[]|error
 {
     var selectRet = followsDB->select(
-        "SELECT follower_id FROM follows WHERE following_id = ?",
+        "SELECT CAST(follower_id AS varchar) FROM follows WHERE following_id = CAST(? AS uuid)",
         Follow_FollowerId, userId);
 
     if ( selectRet is table<Follow_FollowerId> ) {
@@ -88,7 +93,7 @@ public function getFollowers(string userId) returns string[]|error
 
 public function getFollowing(string userId) returns string[]|error
 {
-    var selectRet = followsDB->select("SELECT following_id FROM Follows WHERE follower_id = ?", Follow_FollowingId, userId );
+    var selectRet = followsDB->select("SELECT CAST(following_id AS varchar) FROM Follows WHERE follower_id = CAST(? AS uuid)", Follow_FollowingId, userId );
     if ( selectRet is table<Follow_FollowingId> ) {
         string[] userIdList = [];
         foreach var row in selectRet {
@@ -111,7 +116,7 @@ public function getFollowing(string userId) returns string[]|error
 public function deleteFollow(string followerId, string followingId) returns boolean|error
 {
     var ret = followsDB->update(
-            "DELETE FROM follows WHERE follower_id = ? AND following_id = ?",
+            "DELETE FROM follows WHERE follower_id = CAST(? AS uuid) AND following_id = CAST(? AS uuid)",
             followerId, followingId );
     if (ret is sql:UpdateResult) {
         return ( ret.updatedRowCount > 0 );
