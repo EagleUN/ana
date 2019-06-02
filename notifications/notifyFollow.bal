@@ -5,7 +5,7 @@ import ballerina/config;
 string RAPUNZEL_IP   = config:getAsString("RAPUNZEL_IP");
 string RAPUNZEL_PORT = config:getAsString("RAPUNZEL_PORT"); 
 
-http:Client rapunzelEndpoing = new("http://" + RAPUNZEL_IP + ":" + RAPUNZEL_PORT );
+http:Client rapunzelEndpoing = new(RAPUNZEL_IP + ":" + RAPUNZEL_PORT );
 
 public function notifyFollow(string followerId, string followingId) {
 
