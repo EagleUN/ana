@@ -1,8 +1,9 @@
 # pref=http://192.168.99.107:9090/ana
 pref=http://127.0.0.1:9090/ana
+#pref=35.232.95.82:9090/ana
 
 echo "INSERT follow dfcb2566-1a8d-4cb3-9f46-773adee5bfb4->35f3e5b9-be19-4533-95ae-5d1f02302de6"
-curl $pref/users/dfcb2566-1a8d-4cb3-9f46-773adee5bfb4/following -d "{\"followingId\": \"35f3e5b9-be19-4533-95ae-5d1f02302de6\"}" -H "Content-Type: application/json"
+#curl $pref/users/dfcb2566-1a8d-4cb3-9f46-773adee5bfb4/following -d "{\"followingId\": \"35f3e5b9-be19-4533-95ae-5d1f02302de6\"}" -H "Content-Type: application/json"
 echo && echo
 
 echo "getFollowing(dfcb2566-1a8d-4cb3-9f46-773adee5bfb4)"

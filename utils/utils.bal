@@ -7,8 +7,8 @@ function isAlphanumeric(string s) returns boolean {
 }
 
 public function isUuid(string s) returns boolean{
-    if ( s.length() != 36 ) { return false; }
-    foreach int i in 0...36 {
+    if ( s.length() != SAMPLE_UUID.length() ) { return false; }
+    foreach int i in 0...SAMPLE_UUID.length()-1 {
         if ( SAMPLE_UUID.substring(i,i+1) == "-" ) {
             if ( s.substring(i,i+1) != "-" ) {
                 return false;
