@@ -3,12 +3,9 @@ import ballerina/io;
 import ballerinax/docker;
 
 import controller;
+import errors;
 import notifications;
-
-const string ERROR_NO_FOLLOWING_ID_IN_JSON = "Payload should contain a JSON with a string followingId";
-const string ERROR_FAILED_TO_INSERT_RECORD = "Failed to insert the follow in the database";
-const string INTERNAL_DATABASE_ERROR = "Internal error related to DB";
-const string NO_JSON_PAYLOAD = "There should be a json payload with the request";
+import utils;
 
 #API names for url parameters
 const string USER_ID = "userId";
@@ -18,11 +15,6 @@ const string OTHER_USER_ID = "otherUserId";
 const string FOLLOWER_ID = "followerId";
 const string FOLLOWING_ID = "followingId";
 
-function buildErrorJson ( string message ) returns json {
-    json errorJson = { "message" : message};
-    return errorJson;
-}
-
 function sendResponse(http:Caller caller, http:Response response) {
     error? result = caller -> respond(response);
     if ( result is error) {
@@ -30,9 +22,13 @@ function sendResponse(http:Caller caller, http:Response response) {
     }
 }
 
-function sendErrorResponse(http:Caller caller, int code, json errorJson) {
+function sendErrorResponse(http:Caller caller, int code, string message, string description = "") {
     http:Response response = new;
     response.statusCode = code;
+    json errorJson = { "code" : code, "id" : message };
+    if ( description.length() > 0 ) {
+        errorJson["description"] = description;
+    }
     response.setPayload(untaint errorJson);
     sendResponse(caller, response);
     
@@ -75,9 +71,14 @@ service ana on cmdListener {
         io:println("postFollow(" + userId + ")");
         json|error payload = request.getJsonPayload();
 
-        if ( payload is error ) {
-            io:println("payload is error");
-            sendErrorResponse(caller, 400, buildErrorJson(NO_JSON_PAYLOAD));
+        if ( !utils:isUuid(userId) ) {
+            sendErrorResponse(caller, 400, errors:FOLLOWER_ID_MUST_BE_UUID, description = errors:UUID_DESCRIPTION );
+            return;
+        }
+
+        if ( payload is error )
+        {
+            sendErrorResponse(caller, 400, errors:NO_JSON_PAYLOAD);
         }
         else
         {
@@ -85,11 +86,15 @@ service ana on cmdListener {
             json followingId = payload[FOLLOWING_ID];
             if ( followingId is string )
             {
+                if ( !utils:isUuid(followingId) )
+                {
+                    sendErrorResponse(caller, 400, errors:FOLLOWING_ID_MUST_BE_UUID, description = errors:UUID_DESCRIPTION);
+                    return;
+                }
                 controller:ApiFollow|error r = controller:insertFollow(userId, followingId);
                 if (r is error)
                 {
-                    io:println("insert follow returned error");
-                    sendErrorResponse(caller, 400, buildErrorJson(ERROR_FAILED_TO_INSERT_RECORD));
+                    sendErrorResponse(caller, 400, errors:ERROR_FAILED_TO_INSERT_RECORD);
                 }
                 else
                 {
@@ -104,8 +109,7 @@ service ana on cmdListener {
             }
             else
             {
-                io:println("followingId is not a string");
-                sendErrorResponse(caller, 400, buildErrorJson(ERROR_NO_FOLLOWING_ID_IN_JSON));
+                sendErrorResponse(caller, 400, errors:ERROR_NO_FOLLOWING_ID_IN_JSON);
             }
         }
     }
@@ -116,11 +120,15 @@ service ana on cmdListener {
     }
     resource function getFollowers(http:Caller caller, http:Request request, string userId)
     {
-        io:println("getFollower(" + userId + ")");
+        io:println("getFollowers(" + userId + ")");
+        if ( !utils:isUuid(userId) ) {
+            sendErrorResponse(caller, 400, errors:USER_ID_MUST_BE_UUID, description = errors:UUID_DESCRIPTION);
+            return;
+        }
         controller:ApiUserIdList|error r = controller:getFollowers(userId);
         if ( r is error )
         {
-            sendErrorResponse(caller, 500, INTERNAL_DATABASE_ERROR);
+            sendErrorResponse(caller, 500, errors:INTERNAL_DATABASE_ERROR);
         }
         else {    
             json res = {
@@ -138,10 +146,14 @@ service ana on cmdListener {
     resource function getFollowing(http:Caller caller, http:Request request, string userId)
     {
         io:println("getFollowing(" + userId + ")");
+        if ( !utils:isUuid(userId) ) {
+            sendErrorResponse(caller, 400, errors:USER_ID_MUST_BE_UUID, description = errors:UUID_DESCRIPTION);
+            return;
+        }
         controller:ApiUserIdList|error r = controller:getFollowing(userId);
         if ( r is error )
         {
-            sendErrorResponse(caller, 500, INTERNAL_DATABASE_ERROR);
+            sendErrorResponse(caller, 500, errors:INTERNAL_DATABASE_ERROR);
         }
         else
         {
@@ -160,10 +172,14 @@ service ana on cmdListener {
     resource function deleteFollow(http:Caller caller, http:Request request, string userId, string otherUserId )
     {
         io:println("deleteFollow(" + userId + "," + otherUserId + ")");
+        if ( !utils:isUuid(userId) || !utils:isUuid(otherUserId) ) {
+            sendErrorResponse(caller, 400, errors:USER_ID_MUST_BE_UUID, description = errors:UUID_DESCRIPTION);
+            return;
+        }
         boolean|error r = controller:deleteFollow(userId, otherUserId);
         if ( r is error )
         {
-            sendErrorResponse(caller, 500, INTERNAL_DATABASE_ERROR);
+            sendErrorResponse(caller, 500, errors:INTERNAL_DATABASE_ERROR);
         }
         else
         {
@@ -189,10 +205,14 @@ service ana on cmdListener {
     resource function getFollow(http:Caller caller, http:Request request, string userId, string otherUserId )
     {
         io:println("getFollow(" + userId + "," + otherUserId + ")");
+        if ( !utils:isUuid(userId) || !utils:isUuid(otherUserId) ) {
+            sendErrorResponse(caller, 400, errors:USER_ID_MUST_BE_UUID, description = errors:UUID_DESCRIPTION);
+            return;
+        }
         boolean|error r = controller:follows(userId, otherUserId);
         if ( r is error )
         {
-            sendErrorResponse(caller, 500, INTERNAL_DATABASE_ERROR);
+            sendErrorResponse(caller, 500, errors:INTERNAL_DATABASE_ERROR);
         }
         else
         {

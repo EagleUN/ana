@@ -1,11 +1,11 @@
 swagger: '2.0'
 info:
   version: 1.0.0
-  title: Microservice for Follows
-  description: Java + PostgreSQL
+  title: Microservice to manage Follows
+  description: Ballerina
   license:
     name: Software Architecture, 2019-I
-host: 192.168.99.101:4000 #change
+host: Port 9090
 basePath: /ana/
 schemes:
   - http
