@@ -3,7 +3,7 @@ name = "Eagle"
 version = "0.0.1"
 lockfileversion = "1"
 ballerinaversion = "0.991.0"
-modules = [ "ana_service.bal" , "errors" , "model" , "controller" , "notifications" , "utils" ]
+modules = [ "ana_service.bal" ]
 
 [[module]] 
 org = "Eagle"
