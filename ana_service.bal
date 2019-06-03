@@ -245,7 +245,7 @@ service ana on cmdListener {
                 js["otherUsers"][i] = {
                     "id" : user.id,
                     "name" : user.name,
-                    "last_name" : user.lastName,
+                    "lastName" : user.lastName,
                     "iFollow" : user.iFollow,
                     "followsMe" : user.followsMe
                 };
