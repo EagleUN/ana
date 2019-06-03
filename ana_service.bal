@@ -6,6 +6,7 @@ import controller;
 import errors;
 import notifications;
 import utils;
+import ballerina/grpc;
 
 #API names for url parameters
 const string USER_ID = "userId";
@@ -220,4 +221,36 @@ service ana on cmdListener {
         }
     }
 
+
+    @http:ResourceConfig {
+        methods: ["GET"],
+        path: "users/{" + USER_ID + "}/userList"
+    }
+    resource function getUserListFor(http:Caller caller, http:Request request, string userId ) {
+        io:println("getUserListFor(" + userId + ")");
+        if ( !utils:isUuid(userId) ) {
+            sendErrorResponse(caller, 400, errors:USER_ID_MUST_BE_UUID, description = errors:UUID_DESCRIPTION);
+            return;
+        }
+        controller:ApiOtherUserList|error r = controller:getUsersListFor(userId);
+        if ( r is error ) {
+            sendErrorResponse(caller, 500, r.reason());
+        }
+        else {
+            json js = {
+                "count": r.count,
+                "otherUsers" : [] };
+            foreach int i in 0...r.count-1 {
+                var user = r.otherUsers[i];
+                js["otherUsers"][i] = {
+                    "id" : user.id,
+                    "name" : user.name,
+                    "last_name" : user.lastName,
+                    "iFollow" : user.iFollow,
+                    "followsMe" : user.followsMe
+                };
+            }
+            sendOKResponse(caller, js );
+        }
+    }
 }

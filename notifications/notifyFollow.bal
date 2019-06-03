@@ -17,7 +17,7 @@ public function notifyFollow(string followerId, string followingId) {
 
     if (resp is http:Response)
     {
-        if ( resp.statusCode == 302 )
+        if ( resp.statusCode == 200 )
         {
             io:println("notifyFollow - successfully notified follow " + followerId + " -> " + followingId );
         }

@@ -22,3 +22,16 @@ public type ApiUserIdList object {
         self.userIds = userIds;
     }
 };
+
+public type ApiOtherUser object {
+    public string id = "";
+    public string name = "";
+    public string lastName = "";
+    public boolean followsMe = false;
+    public boolean iFollow = false;
+};
+
+public type ApiOtherUserList object {
+    public int count = 0;
+    public ApiOtherUser[] otherUsers = [];
+};
