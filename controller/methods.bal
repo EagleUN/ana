@@ -93,9 +93,12 @@ function buildApiOtherUserList ( string userId, json js ) returns ApiOtherUserLi
                     u.lastName = otherUserLastName;
                     var iFollow = follows(userId, u.id);
                     var followsMe = follows(u.id, userId);
-                    if ( iFollow is error || followsMe is error )
+                    if ( iFollow is error )
                     {
-                        return buildError ("Couldn't not determine follows relationship between " + userId + " and " + u.id );
+                        return buildError ("Couldn't not determine follows relationship between " + userId + " and " + u.id + ". Message: " + <string>iFollow.detail().message );
+                    }
+                    else if ( followsMe is error ) {
+                        return buildError ("Couldn't not determine follows relationship between " + userId + " and " + u.id + ". Message: " + <string>followsMe.detail().message );
                     }
                     else
                     {
@@ -103,7 +106,7 @@ function buildApiOtherUserList ( string userId, json js ) returns ApiOtherUserLi
                         u.followsMe = followsMe;
                         r.otherUsers[r.count] = u;
                         r.count += 1;
-                    }
+                    }  
                 }
             }
         }
