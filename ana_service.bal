@@ -105,6 +105,7 @@ service ana on cmdListener {
                     json res = { };
                     res[FOLLOWER_ID] = r.followerId;
                     res[FOLLOWING_ID] = r.followingId;
+                    io:println("Successfully finished postFollow");
                     sendOKResponse(caller, res);
                 }
             }
@@ -136,6 +137,7 @@ service ana on cmdListener {
                 "count": r.count,
                 "userIds": r.userIds
             };      
+            io:println("Successfully finished getFollowers");
             sendOKResponse(caller, res);
         }
     }
@@ -162,6 +164,7 @@ service ana on cmdListener {
                 "count": r.count,
                 "userIds": r.userIds
             };
+            io:println("Successfully finished getFollowing");
             sendOKResponse(caller, res);
         }
     }
@@ -187,6 +190,7 @@ service ana on cmdListener {
             json res = { };
             res[FOLLOWER_ID] = userId;
             res[FOLLOWING_ID] = otherUserId;
+            io:println("Successfully finished deleteFollow");
             sendOKResponse(caller, res);
         }
     }
@@ -217,6 +221,7 @@ service ana on cmdListener {
         }
         else
         {
+            io:println("Successfully finished getFollow");
             sendOKResponse(caller, {"follows": r} );   
         }
     }
@@ -250,6 +255,7 @@ service ana on cmdListener {
                     "followsMe" : user.followsMe
                 };
             }
+            io:println("Successfully finished getUserList");
             sendOKResponse(caller, js );
         }
     }
