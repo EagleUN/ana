@@ -20,7 +20,11 @@ string DB_URL = "jdbc:postgresql://" + DB_IP + ":" + DB_PORT + "/" + DB_NAME;
 jdbc:Client followsDB = new({
     url: DB_URL,
     username: DB_USERNAME,
-    password: DB_PASSWORD
+    password: DB_PASSWORD,
+    poolOptions: {
+        maximumPoolSize: 5,
+        idleTimeout: 100000
+    }
 });
 
 type ModelError error<string, map<anydata|error>>;
