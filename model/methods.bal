@@ -22,7 +22,7 @@ jdbc:Client followsDB = new({
     username: DB_USERNAME,
     password: DB_PASSWORD,
     poolOptions: {
-        maximumPoolSize: 5,
+        maximumPoolSize: 20,
         idleTimeout: 100000
     }
 });
