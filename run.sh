@@ -1,10 +1,10 @@
+sudo rm -rf docker
 sudo ballerina build ana_service.bal
-sudo docker container rm target_ana_service_1
 
-sudo cp docker-compose.yml target
-sudo cp postgresql-42.2.5.jar target
-sudo cp ballerina.conf target
+# sudo cp docker-compose.yml docker
+# sudo cp postgresql-42.2.5.jar target
+# sudo cp ballerina.conf target
 
-cd target
+#cd docker
 sudo docker-compose build
 sudo docker-compose up

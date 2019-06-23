@@ -4,6 +4,6 @@ services:
   ana_service:
     build:
       context: .
-      dockerfile: './ana_service/Dockerfile'
+      dockerfile: './docker/Dockerfile'
     ports:
       - '9090:9090'
