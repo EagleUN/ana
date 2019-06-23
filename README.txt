@@ -2,20 +2,6 @@ Requirementes:
 - Ballerina: https://ballerina.io/downloads/
 - Docker: https://www.docker.com/
 
-To build the image and generate the docker file run:
+To build and run:
 
-$ sudo ballerina build ana_service.bal
-
-You can now see the Dockerfile in target/ana_service and the docker-compose.yml in target.
-
-To run the project run:
-
-$ sudo docker run -d -p 9090:9090 ana_service:latest
-
-
-To run with docker-compose:
-
-Change directory to target.
-
-    ports:
-      - '9090:9090'
+$ ./run.sh
