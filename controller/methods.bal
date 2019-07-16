@@ -77,11 +77,10 @@ function buildApiOtherUserList ( string userId, json js ) returns ApiOtherUserLi
         var userList = js["list"];
         foreach int i in 0...totalUsers-1 {
             var otherUser = userList[i];
-            if ( otherUser["id"] != userId ) {
-                
+            if ( otherUser["uuid"] != userId ) {                
                 var otherUserName = string.convert(otherUser["name"]);
                 var otherUserLastName = string.convert(otherUser["last_name"]);
-                var otherUserId = string.convert(otherUser["id"]);
+                var otherUserId = string.convert(otherUser["uuid"]);
                 if ( otherUserName is error || otherUserLastName is error || otherUserId is error ) {
                     return buildError("Vanellope must return user's name, last_name and id for each each");
                 }
